@@ -114,6 +114,26 @@ exports.deletePost = (req, res, next) => {
         .catch(err => res.status(404).json({ err }));
 };
 
+//exports.getOneImage = (req, res, next) => {
+//    const { id: postId } = req.params;
+//    const sqlGetImage = `SELECT * FROM images WHERE images.post_id = ${postId};`;
+//    db.query(sqlGetImage, (err, result) => {
+//        if (err) {
+//            res.status(404).json({ err });
+//            throw err;
+//        }
+//        if (result[0]) {
+//            result[0].image_url =
+//                req.protocol +
+//                '://' +
+//                req.get('host') +
+//                '/images/posts/' +
+//                result[0].image_url;
+//        }
+//        res.status(200).json(result);
+//    });
+//};
+
 // Like & unlike a post
 
 exports.likeUnlikePost = (req, res) => {
