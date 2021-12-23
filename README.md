@@ -1,100 +1,85 @@
-# Groupomania
+# PROJET 7 - OPENCLASSROOMS - DEVELOPPEUR WEB
 
-Projet 7 de la formation développeur Web d'OpenClassrooms.
-Création d'un réseau social interne pour les employés de la société Groupomania.
+## Groupomania - Réseau social d'entreprise
 
----
+<h3>- Compétences évaluées :</h3>
+<ul>
+  <li>  Authentifier un utilisateur et maintenir sa session</li>
+  <li>  Personnaliser le contenu envoyé à un client web</li>
+  <li>  Gérer un stockage de données à l'aide de SQL</li>
+  <li>  Implémenter un stockage de données sécurisé en utilisant SQL</li>
+</ul>
 
-## Technologies
+### - Technologies utilisées :
+NodeJs - VueJs - MySQL - Bootstrap - Sass
 
-Voici la liste des technologies utilisées pour ce projet :
+Démo du site sur youtube : https://www.youtube.com/watch?v=RFtriVHPOjM&t=2s&ab_channel=ThomasLandais
+  
+## INSTALLATION
+### Prérequis :
+Il vous faut avoir installé sur votre machine :
 
-### Frontend
+<ul>
+  <li> Git : https://git-scm.com/downloads</li>
+  <li> Node.js : https://nodejs.org/en/</li>
+  <li> MySql :  https://dev.mysql.com/downloads/installer/</li>
+</ul>
 
--   Vue.js : Version 2.6.12
+Créer un dossier vide puis cloner ce repository à l'intérieur : 
 
-### Backend
-
--   MySQL2 : Version 2.2.5
--   Sequelize : Version 6.3.5
--   Node.js : Version 12.18.4
--   Express : Version 4.17.1
-
-Vous trouverez [la documentation de l'API](https://documenter.getpostman.com/view/13932892/TVsuBSah)
-
-## Installation
-
-### Base de données
-
-Vous devez avoir MySQL installé en localhost sur le port 3306. Créez la base de données :
-
+```
+git clone https://github.com/ThomasL9731/Groupomania.git
+```
+## MySQL
+Dans le fichier groupomania/backend/.env ,mettre le mot de passe d'accès à votre base de donnée et votre nom d'utilisateur si besoin (root par défaut)
+```
+DB_USER=root
+DB_PASS=
+```
+Ouvrir MySql command Line client puis effectuer ces deux lignes de commandes :
 ```
 CREATE DATABASE groupomania;
+USE groupomania;
 ```
-
-Pour la version MySQL 5.7 ou inférieure, créez l'utilisateur :
-
+Importer le fichier groupomania.sql (qui ce trouve a la racine du projet) : 
 ```
-CREATE USER 'groupomania'@'localhost' IDENTIFIED BY 'knutR66t-st';
+source (chemin vers le fichier groupomania.sql);
 ```
+Attention a indiquer le chemin avec des "/" et non des "\ ".
 
-Pour la version MySQL 8 ou supérieure, créez l'utilisateur de cette façon :
-
-```
-CREATE USER 'groupomania'@'localhost'IDENTIFIED WITH mysql_native_password BY 'knutR66t-st';
-```
-
-Donnez les droits sur la base de données groupomania à l'utilisateur créé :
-
-```
-GRANT ALL PRIVILEGES ON groupomania.* TO 'groupomania'@'localhost';
-```
-
-### Application
-
-Vous devez avoir Node.js installé sur votre ordinateur.<br/>
-Clonez ce dépôt GitHub. Rendez-vous dans le dossier **backend** et installez les modules nécessaires :
-
+## BACK END
+Ouvrir un terminal dans le dossier backend puis effectuer les lignes de commandes suivantes :
 ```
 npm install
-```
-
-Démarrez l'API :
-
-```
 node server
 ```
-
-Pour continuer, vous devez avoir Vue CLI installé :
-
-```
-npm install -g @vue/cli
-```
-
-Depuis le dossier **frontend**, installez les modules nécessaires :
-
+## FRONT END
+Ouvrir un autre terminal dans le dossier frontend puis effectuer les lignes de commandes suivantes :
 ```
 npm install
-```
-
-Puis démarrez l'application :
-
-```
 npm run serve
 ```
 
-Rendez-vous sur votre navigateur à l'adresse : http://localhost:8080
+Ouvrir le navigateur a l'adresse http://localhost:8080/
 
-### Pour définir un utilisateur en tant qu'administrateur
+### Fonctionnalités :
+Le site permet de
+<ul>
+  <li>Partager des posts (avec ou sans photos)</li>
+  <li>Commenter et liker des posts</li>
+  <li>Personnaliser son profil (changement de photo de profil, description...)</li>
+  <li>Modifier et supprimer son compte</li>
+</ul>
 
-Rendez-vous dans la base de données groupomania :
-
+Un compte admin est présent pour la modération (suppression des posts et commentaires d'autres utilisateurs).
+<br>
+Voici les codes d'accès admin :
 ```
-USE groupomania;
+admin@admin.com
+Admin.31
 ```
 
-Modifier la donnée is_admin en renseignant l'adresse email de votre inscription :
+Bonne visite !
 
-```
-UPDATE users SET is_admin = 1 WHERE email = 'votre adresse email';
-```
+![Capture d’écran 2021-12-14 171505](https://user-images.githubusercontent.com/76964599/146037451-051d9dcb-257f-45a3-86a0-9bc53df309fd.png)
+
