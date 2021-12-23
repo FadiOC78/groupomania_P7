@@ -13,5 +13,19 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <div class="card-icons">
+      <div class="like-container">
+        <input
+          type="checkbox"
+          :value=product.id
+          name="checkbox"
+          v-bind:id="product.id"
+          v-model="liked"
+          @click="setLikeCookie()"
+        />
+        <label v-bind:for="product.id">
+          <i class="fas fa-heart"></i>
+        </label>
+      </div>
   </body>
 </html>

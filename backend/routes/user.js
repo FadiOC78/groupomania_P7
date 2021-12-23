@@ -1,15 +1,18 @@
-module.exports = (app) => {
-  const users = require("../controllers/user");
-  const auth = require("../middleware/auth");
-  const multer = require("../middleware/multer-config");
+const express = require("express");
+const router = express.Router();
+const userCtrl = require("../controllers/user");
+const multer = require("../middleware/multerUser");
+const auth = require("../middleware/authGetUser");
+const authTokenId = require("../middleware/auth");
+const validEmail = require("../middleware/email");
 
-  const router = require("express").Router();
+router.delete("/delete/:id", userCtrl.delete);
+router.post("/signup", validEmail, multer, userCtrl.signup);
+router.post("/login", userCtrl.login);
+router.put("/modify/:id", authTokenId, multer, userCtrl.modifyPP);
+router.put("/modifyAccount/:id", authTokenId, userCtrl.modifAccount);
+router.put("/modifyPassword/:id", authTokenId, userCtrl.modifyPassword);
+router.post("/", auth, userCtrl.getOne);
+router.post("/getAs", auth, userCtrl.getAs);
 
-  router.post("/", users.createUser);
-  router.post("/login", users.login);
-  router.get("/:id", auth, users.getOneUser);
-  router.put("/:id", auth, multer, users.modifyUser);
-  router.delete("/:id", auth, users.deleteUser);
-
-  app.use("/api/users", router);
-};
+module.exports = router;

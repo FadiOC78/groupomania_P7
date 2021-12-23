@@ -84,6 +84,26 @@
               </b-button-group>
             </div>
           </b-col>
+          
+           
+          
+          <b-col cols="12" sm="2" md="2" lg="2">
+            <div class="card-icons">
+                  <div class="like-container">
+                    <input
+                      type="checkbox"
+                      :value=product.id
+                      name="checkbox"
+                      v-bind:id="product.id"
+                      v-model="liked"
+                      @click="setLikeCookie()"
+                    />
+                    <label v-bind:for="product.id">
+                      <i class="fas fa-heart"></i>
+                    </label>
+                  </div>
+            </div>
+           </b-col>       
         </b-row>
       </b-col>
     </b-row>
