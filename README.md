@@ -77,24 +77,42 @@ Dans le fichier groupomania/backend/.env ,mettre le mot de passe d'accès à vot
 DB_USER=root
 DB_PASS=
 ```
-Ouvrir MySql command Line client puis effectuer ces deux lignes de commandes :
+## La base de données
+
+L'application nécessite une base de données Mysql. Vous devez avoir un utilisateur avec les droits pour la base de données que l'on va créer.
+
+Si vous n'avez pas d'utilisateur créé, vous pouvez en créer un de la façon suivante, en étant connecté en tant que root :
+```
+CREATE USER 'votreUtilisateur'@'localhost' IDENTIFIED BY 'votreMotDePasse';
+```
+Ensuite, nous allons créer la base de données qui servira au projet.
 ```
 CREATE DATABASE groupomania;
+```
+Donnons les droits à l'utilisateur à la base de données
+```
+GRANT ALL PRIVILEGES ON groupomania.* TO 'votreUtilisateur'@'localhost';
+```
+On quitte la session root, on se connecte avec l'utilisateur
+```
+exit mysql -u votreUtilisateur -p
+```
+On sélectionne la base de données à utiliser
+```
 USE groupomania;
 ```
-Importer le fichier groupomania.sql (qui ce trouve a la racine du projet) : 
-```
-source (chemin vers le fichier groupomania.sql);
-```
-Attention a indiquer le chemin avec des "/" et non des "\ ".
+La base de données est prête.
 
-## BACK END
+## Backend
+  - Chargez le package `nodemon` : `npm install -g nodemon`
+  - Pour installer `Express.js`, exécutez la commande : `npm install --save express`
+  - pour le téléchargement de fichiers, installez le package `Multer` : `npm install --save multer`
+  - Lancez les commandes: `npm i fs`, `npm install body-parser`
 Ouvrir un terminal dans le dossier backend puis effectuer les lignes de commandes suivantes :
 ```
 npm install
 node server
 ```
-## FRONT END
 ## Frontend
 
 - Framework **Vue.js** avec l'utilisation de **Vue CLI**
