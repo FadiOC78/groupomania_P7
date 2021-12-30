@@ -112,7 +112,7 @@
       </nav>
     </div>
   </header>
-  <router-view :key="$route.fullPath" />
+  <router-view :key="$route.fullPath"></router-view>
 </template>
 
 <style lang="scss">
