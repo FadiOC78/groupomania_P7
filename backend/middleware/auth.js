@@ -1,17 +1,19 @@
 const jwt = require("jsonwebtoken");
+const { secret } = require("../config.json");
 
-module.exports = (req,res,next) => {
-    try{
-        const token = req.headers.authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token,process.env.SECRET_TOKEN_KEY);
-        const userId = decodedToken.userId;
-        
-        if (req.body.userId && req.body.userId != userId) {
-            return res.status(403).json("unauthorized request")
-        }else{
-            next();
-        }
-    }catch(e){
-        res.status(401).json({error:'Invalid request!'});
+module.exports = (req, res, next) => {
+  try {
+    const token = req.headers.authorization; //Récupération du token du header
+    const decodedToken = jwt.verify(token, secret); //Décodage du token
+    const userId = decodedToken.userId;
+    if (req.headers.userid !== userId) {
+      throw "User ID non valable !";
+    } else {
+      next();
     }
-}
+  } catch {
+    res.status(401).json({
+      error: new Error("Requête non valide"),
+    });
+  }
+};

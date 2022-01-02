@@ -1,118 +1,175 @@
-const { pool } = require('../config/db');
-const fs = require("fs");
+const db = require('../models');
+const Post = db.post;
 
-exports.getAll = (req, res, next) => {
-    // TOUT LES POST DU DERNIER AU PREMIER
-    let sql = "SELECT * FROM post p JOIN user WHERE user.id=authorId ORDER BY date DESC LIMIT 50;";
-    pool.execute(sql, function (err, result) {
-        if (err) res.status(400).json({ err });
-        res.status(200).json(result)
-    });
-}
-
-exports.getByAuthor = (req, res, next) => {
-    let sql = `SELECT * FROM post JOIN user WHERE user.id=authorId AND authorId=? ORDER BY date DESC;`;
-    pool.execute(sql, [req.body.id], function (err, result) {
-        if (err) res.status(400).json({ err });
-        res.status(200).json(result)
-    });
-}
-
-exports.create = (req, res, next) => {
-    // DEFINI LES CHAMPS REMPLI
-    const image = (req.file) ? `${req.protocol}://${req.get('host')}/images/post/${req.file.filename}` : "";
-    const textSend = (req.body.text) ? req.body.text : " ";
+// Création d'un post
+exports.createPost = (req, res, next) => {
     const post = {
-        text: textSend,
-        imageUrl: image,
-        like: 0,
-        date: new Date().toLocaleString("af-ZA", { timeZone: "Europe/Paris" }),
-        authorId: req.body.userId,
+        content: req.body.content,
+        user_id: req.body.user_id,
     };
-    //ENVOIE LA REQUETE AVEC MULTER ET LES VALEURS PAR DEFAUT
-    let sql = `INSERT INTO post (text, imageUrl, date, authorId) VALUES (?,?,?,?);`;
-    pool.execute(sql, [post.text, post.imageUrl, post.date, post.authorId], function (err, result) {
-        if (err) throw err;
-        res.status(201).json({ message: `Post ajouté` });
-    })
+    if (req.file) {
+        post.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    }
+    Post.create(post)
+        .then(data => {
+            res.status(200).json(data);
+        })
+        .catch(err => res.status(500).json({ err }));
 };
 
-exports.delete = (req, res, next) => {
-    let sql = `SELECT * FROM post WHERE postId = ?`;
-    pool.execute(sql, [req.params.id], function (err, result) {
-        if (err) res.status(400).json({ err });
-        if (!result[0]) res.status(400).json({ message: "Aucun id ne correspond dans la table" });
-        else {
-            if (result[0].authorId == req.body.userId || req.body.admin == true) {
-                // SI LE POST A UNE IMAGE, LA SUPPRIMER DU DOSSIER IMAGES
-                if (result[0].imageUrl != "") {
-                    const name = result[0].imageUrl.split('/images/post/')[1];
-                    fs.unlink(`images/post/${name}`, () => {
-                        if (err) console.log(err);
-                        else console.log('Image supprimée  !');
-                    })
-                }
-                // SUPPRIME LE POST DANS LA DB
-                let sql2 = `DELETE FROM post WHERE postId = ?`;
-                pool.execute(sql2, [req.params.id], function (err, result) {
-                    if (err) throw err;
-                    res.status(201).json({ message: `Post supprimé` });
-                });
-            } else {
-                res.status(401).json({message : "Bien essayé petit malin"});
-            }
+// Récupération d'un post selon id
+exports.getOnePost = (req, res, next) => {
+    const id = req.params.id;
+    Post.findByPk(id)
+        .then(data => {
+            res.status(200).json(data);
+        })
+        .catch(err => res.status(500).json({ err }));
+};
 
+// Récupération de tous les posts par utilisateur
+exports.getAllUsersPosts = (req, res, next) => {
+    Post.findAll({
+        where: { user_id: req.params.id },
+        order: [['created_at', 'DESC']],
+        include: [
+            {
+                model: db.user,
+            },
+        ],
+    })
+        .then(posts => {
+            const postObject = posts.map(post => {
+                return Object.assign({
+                    id: post.id,
+                    content: post.content,
+                    user: post.user.pseudo,
+                    userProfilePicture: post.user.profil_picture,
+                    userId: post.user.id,
+                    creationDate: post.created_at,
+                    image: post.image,
+                    email: post.user.email,
+                });
+            });
+            res.status(200).json(postObject);
+        })
+        .catch(err => res.status(500).json({ err }));
+};
+
+// Récupération de tous les posts
+exports.getAllPosts = (req, res, next) => {
+    Post.findAll({
+        order: [['created_at', 'DESC']],
+        include: [
+            {
+                model: db.user,
+            },
+        ],
+    })
+        .then(posts => {
+            const postObject = posts.map(post => {
+                return Object.assign({
+                    id: post.id,
+                    content: post.content,
+                    user: post.user.pseudo,
+                    userProfilePicture: post.user.profil_picture,
+                    userId: post.user.id,
+                    creationDate: post.created_at,
+                    image: post.image,
+                    email: post.user.email,
+                });
+            });
+            res.status(200).json(postObject);
+        })
+        .catch(err => res.status(500).json({ err }));
+};
+
+//Modification d'un post
+exports.modifyPost = (req, res, next) => {
+    const post = {
+        content: req.body.content,
+    };
+    if (req.file) {
+        post.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    } else if (req.body.image === 'delete') {
+        post.image = '';
+    }
+    Post.update(post, {
+        where: { id: req.params.id },
+        returning: true, //Option Sequelize qui permet de retourner le post
+        plain: true,
+    })
+        .then(() => res.status(200).json({ message: 'post modified' }))
+        .catch(err => res.status(404).json({ err }));
+};
+
+//Suppression d'un post
+exports.deletePost = (req, res, next) => {
+    Post.destroy({
+        where: {
+            id: req.params.id,
+        },
+    })
+        .then(() => res.status(200).json({ message: 'post deleted !' }))
+        .catch(err => res.status(404).json({ err }));
+};
+
+// Like & unlike a post
+
+exports.likeUnlikePost = (req, res) => {
+    const { userId, postId } = req.body;
+    const sqlSelect = `SELECT * FROM likes WHERE likes.user_id = ${userId} AND likes.post_id = ${postId}`;
+    db.query(sqlSelect, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(404).json({ err });
+            throw err;
+        }
+
+        if (result.length === 0) {
+            const sqlInsert = `INSERT INTO likes (user_id, post_id) VALUES (${userId}, ${postId})`;
+            db.query(sqlInsert, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    res.status(404).json({ err });
+                    throw err;
+                }
+                res.status(200).json(result);
+            });
+        } else {
+            const sqlDelete = `DELETE FROM likes WHERE likes.user_id = ${userId} AND likes.post_id = ${postId}`;
+            db.query(sqlDelete, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    res.status(404).json(err);
+                    throw err;
+                }
+                res.status(200).json(result);
+            });
         }
     });
 };
 
-exports.modify = (req, res, next) => {
-    if (req.file) {
-        let sql = `SELECT * FROM post WHERE id = ?`;
-        pool.execute(sql, [req.params.id], function (err, result) {
-            if (err) res.status(400).json({ e });
-            if (!result[0]) res.status(400).json({ message: "Aucun id ne correspond dans la table" });
-            else {
-                // SI LE POST A UNE IMAGE, LA SUPPRIMER DU DOSSIER IMAGES
-                if (result[0].imageUrl != "") {
-                    const name = result[0].imageUrl.split('/images/post/')[1];
-                    fs.unlink(`images/${name}`, () => {
-                        if (err) console.log(err);
-                        else console.log('Image modifiée !');
-                    })
-                }
-                // RECUPERE LES INFOS ENVOYER PAR LE FRONT 
-                let image = (req.file) ? `${req.protocol}://${req.get('host')}/images/post/${req.file.filename}` : "";
-                let textSend = (req.body.post) ? req.body.post.text : " ";
-                const post = {
-                    text: textSend,
-                    imageUrl: image,
-                    date: new Date().toLocaleString("af-ZA", { timeZone: "Europe/Paris" })
-                };
-                // UPDATE LA DB
-                let sql2 = `UPDATE post
-                SET text = ?, imageUrl= ?, date = ?
-                WHERE id = ?`;
-                pool.execute(sql2, [post.textSend, post.imageUrl, post.date, req.params.id], function (err, result) {
-                    if (err) throw err;
-                    res.status(201).json({ message: `Post udpate` });
-                });
-            }
-        });
-    } else {
-        // RECUPERE LES INFOS ENVOYER PAR LE FRONT 
-        const textSend = (req.body.post) ? req.body.post.text : " ";
-        const post = {
-            text: textSend,
-            date: new Date().toLocaleString("af-ZA", { timeZone: "Europe/Paris" })
-        };
-        // UPDATE LA DB
-        let sql2 = `UPDATE post
-                SET text = ?, date =?
-                WHERE id = ?`;
-        pool.execute(sql2, [post.text, post.date, req.params.id], function (err, result) {
-            if (err) throw err;
-            res.status(201).json({ message: `Post update` });
-        });
-    }
+exports.postLikedByUser = (req, res) => {
+    const { userId, postId } = req.body;
+    const sql = `SELECT post_id, user_id FROM likes WHERE user_id = ${userId} AND post_id = ${postId}`;
+    db.query(sql, (err, result) => {
+        if (err) {
+            res.status(404).json({ err });
+            throw err;
+        }
+        res.status(200).json(result);
+    });
+};
+
+exports.countLikes = (req, res) => {
+    const { postId } = req.body;
+    const sqlInsert = `SELECT COUNT(*) AS total FROM likes WHERE likes.post_id = ${postId}`;
+    db.query(sqlInsert, (err, result) => {
+        if (err) {
+            res.status(404).json({ err });
+            throw err;
+        }
+        res.status(200).json(result);
+    });
 };
