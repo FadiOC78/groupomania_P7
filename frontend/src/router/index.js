@@ -4,7 +4,7 @@ import VueRouter from 'vue-router'
 import Login from '../components/login'
 import Signup from '../components/signup'
 import Profile from '../components/profile'
-import Forum from '../components/porum'
+import Forum from '../components/forum'
 
 
 Vue.use(VueRouter)
