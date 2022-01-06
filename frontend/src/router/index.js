@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import Login from '../components/login'
-import Signup from '../components/signup'
-import Profile from '../components/profile'
-import Forum from '../components/forum'
+import Login from '../components/Login'
+import Signup from '../components/Signup'
+import Profile from '../components/Profile'
+import Forum from '../components/Forum'
 
 
 Vue.use(VueRouter)
